@@ -1,56 +1,71 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Create RAG Agent with agentscope
-The system SHALL create a RAG Agent using agentscope framework.
+### 需求：使用 agentscope 创建 RAG Agent
 
-#### Scenario: Initialize agent
-- **WHEN** system starts
-- **THEN** system creates agentscope Agent with RAG tool registered
+系统 SHALL 使用 agentscope 框架创建 RAG Agent。
 
-#### Scenario: Agent ReAct loop
-- **WHEN** user asks question
-- **THEN** agent performs reasoning-acting loop to retrieve and answer
+#### 场景：初始化 Agent
 
-### Requirement: Retrieve relevant context
-The system SHALL retrieve relevant context for user questions.
+- **WHEN** 系统启动
+- **THEN** 系统创建 agentscope Agent 并注册 RAG 工具
 
-#### Scenario: Automatic retrieval
-- **WHEN** user asks question
-- **THEN** agent automatically retrieves relevant chunks from knowledge base
+#### 场景：Agent ReAct 循环
 
-#### Scenario: Multi-query retrieval
-- **WHEN** complex question is asked
-- **THEN** agent generates multiple search queries to improve recall
+- **WHEN** 用户提问
+- **THEN** Agent 执行推理-行动循环以检索和回答
 
-### Requirement: Generate answers with citations
-The system SHALL generate answers with source citations.
+### 需求：检索相关上下文
 
-#### Scenario: Answer with citations
-- **WHEN** agent generates answer
-- **THEN** answer includes inline citations referencing source chunks
+系统 SHALL 为用户问题检索相关上下文。
 
-#### Scenario: Citation format
-- **WHEN** citation is generated
-- **THEN** citation includes document name, chunk location, and relevance score
+#### 场景：自动检索
 
-### Requirement: Support view original source
-The system SHALL allow users to view original source text.
+- **WHEN** 用户提问
+- **THEN** Agent 自动从知识库检索相关片段
 
-#### Scenario: Click citation to view source
-- **WHEN** user clicks on citation
-- **THEN** system displays original chunk text with surrounding context
+#### 场景：多查询检索
 
-#### Scenario: Highlight relevant text
-- **WHEN** source is displayed
-- **THEN** system highlights the specific text used in answer
+- **WHEN** 提出复杂问题
+- **THEN** Agent 生成多个搜索查询以提升召回率
 
-### Requirement: Support configurable agent behavior
-The system SHALL allow configuration of agent behavior.
+### 需求：生成带引用的答案
 
-#### Scenario: Custom system prompt
-- **WHEN** user configures system prompt
-- **THEN** agent uses specified system prompt for answer generation
+系统 SHALL 生成带来源引用的答案。
 
-#### Scenario: Custom temperature
-- **WHEN** user configures temperature parameter
-- **THEN** agent uses specified temperature for LLM generation
+#### 场景：带引用的答案
+
+- **WHEN** Agent 生成答案
+- **THEN** 答案包含引用来源片段的内联引用
+
+#### 场景：引用格式
+
+- **WHEN** 引用被生成
+- **THEN** 引用包含文档名称、片段位置和相关性分数
+
+### 需求：支持查看原文
+
+系统 SHALL 允许用户查看原始来源文本。
+
+#### 场景：点击引用查看原文
+
+- **WHEN** 用户点击引用
+- **THEN** 系统显示原始片段文本及上下文
+
+#### 场景：高亮相关文本
+
+- **WHEN** 原文被显示
+- **THEN** 系统高亮显示答案中使用的特定文本
+
+### 需求：支持可配置的 Agent 行为
+
+系统 SHALL 允许配置 Agent 行为。
+
+#### 场景：自定义系统提示词
+
+- **WHEN** 用户配置系统提示词
+- **THEN** Agent 使用指定的系统提示词生成答案
+
+#### 场景：自定义温度参数
+
+- **WHEN** 用户配置温度参数
+- **THEN** Agent 使用指定的温度进行 LLM 生成

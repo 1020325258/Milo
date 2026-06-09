@@ -1,60 +1,76 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Create knowledge base
-The system SHALL allow users to create new knowledge bases.
+### 需求：创建知识库
 
-#### Scenario: Create with name and description
-- **WHEN** user provides name and description
-- **THEN** system creates knowledge base with specified metadata
+系统 SHALL 允许用户创建新知识库。
 
-#### Scenario: Create with embedding model config
-- **WHEN** user specifies embedding model
-- **THEN** system creates knowledge base with specified embedding configuration
+#### 场景：使用名称和描述创建
 
-#### Scenario: Duplicate name check
-- **WHEN** user creates knowledge base with existing name
-- **THEN** system returns error indicating name already exists
+- **WHEN** 用户提供名称和描述
+- **THEN** 系统创建具有指定元数据的知识库
 
-### Requirement: Edit knowledge base
-The system SHALL allow users to edit knowledge base metadata.
+#### 场景：使用 Embedding 模型配置创建
 
-#### Scenario: Update name and description
-- **WHEN** user updates name or description
-- **THEN** system updates knowledge base metadata
+- **WHEN** 用户指定 Embedding 模型
+- **THEN** 系统创建具有指定 Embedding 配置的知识库
 
-#### Scenario: Update embedding config
-- **WHEN** user updates embedding model configuration
-- **THEN** system updates config and marks for re-indexing
+#### 场景：重复名称检查
 
-### Requirement: Delete knowledge base
-The system SHALL allow users to delete knowledge bases.
+- **WHEN** 用户创建具有现有名称的知识库
+- **THEN** 系统返回错误，指示名称已存在
 
-#### Scenario: Delete empty knowledge base
-- **WHEN** user deletes knowledge base with no documents
-- **THEN** system removes knowledge base immediately
+### 需求：编辑知识库
 
-#### Scenario: Delete knowledge base with documents
-- **WHEN** user deletes knowledge base containing documents
-- **THEN** system confirms deletion and removes all associated documents and chunks
+系统 SHALL 允许用户编辑知识库元数据。
 
-### Requirement: List knowledge bases
-The system SHALL allow users to list all knowledge bases.
+#### 场景：更新名称和描述
 
-#### Scenario: List with pagination
-- **WHEN** user requests knowledge base list
-- **THEN** system returns paginated list with total count
+- **WHEN** 用户更新名称或描述
+- **THEN** 系统更新知识库元数据
 
-#### Scenario: List with search
-- **WHEN** user provides search keyword
-- **THEN** system returns knowledge bases matching keyword in name or description
+#### 场景：更新 Embedding 配置
 
-### Requirement: View knowledge base details
-The system SHALL allow users to view knowledge base details.
+- **WHEN** 用户更新 Embedding 模型配置
+- **THEN** 系统更新配置并标记需要重新索引
 
-#### Scenario: View statistics
-- **WHEN** user views knowledge base
-- **THEN** system displays document count, chunk count, and storage size
+### 需求：删除知识库
 
-#### Scenario: View recent documents
-- **WHEN** user views knowledge base
-- **THEN** system displays recently added documents
+系统 SHALL 允许用户删除知识库。
+
+#### 场景：删除空知识库
+
+- **WHEN** 用户删除没有文档的知识库
+- **THEN** 系统立即删除知识库
+
+#### 场景：删除包含文档的知识库
+
+- **WHEN** 用户删除包含文档的知识库
+- **THEN** 系统确认删除并移除所有关联的文档和片段
+
+### 需求：列出知识库
+
+系统 SHALL 允许用户列出所有知识库。
+
+#### 场景：分页列表
+
+- **WHEN** 用户请求知识库列表
+- **THEN** 系统返回带总数的分页列表
+
+#### 场景：搜索列表
+
+- **WHEN** 用户提供搜索关键词
+- **THEN** 系统返回名称或描述中匹配关键词的知识库
+
+### 需求：查看知识库详情
+
+系统 SHALL 允许用户查看知识库详情。
+
+#### 场景：查看统计信息
+
+- **WHEN** 用户查看知识库
+- **THEN** 系统显示文档数量、片段数量和存储大小
+
+#### 场景：查看最近文档
+
+- **WHEN** 用户查看知识库
+- **THEN** 系统显示最近添加的文档

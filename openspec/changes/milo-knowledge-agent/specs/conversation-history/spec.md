@@ -1,60 +1,76 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Store conversation history
-The system SHALL store all conversation history in MySQL.
+### 需求：存储对话历史
 
-#### Scenario: Create new conversation
-- **WHEN** user starts new chat
-- **THEN** system creates conversation record with unique ID and timestamp
+系统 SHALL 在 MySQL 中存储所有对话历史。
 
-#### Scenario: Store messages
-- **WHEN** user or agent sends message
-- **THEN** system stores message with role, content, and timestamp
+#### 场景：创建新对话
 
-#### Scenario: Store retrieval context
-- **WHEN** agent retrieves context for answer
-- **THEN** system stores retrieved chunk IDs with message
+- **WHEN** 用户开始新对话
+- **THEN** 系统创建具有唯一 ID 和时间戳的对话记录
 
-### Requirement: List conversation history
-The system SHALL allow users to view conversation history.
+#### 场景：存储消息
 
-#### Scenario: List conversations
-- **WHEN** user requests conversation list
-- **THEN** system returns paginated list sorted by last activity time
+- **WHEN** 用户或 Agent 发送消息
+- **THEN** 系统存储带有角色、内容和时间戳的消息
 
-#### Scenario: Search conversations
-- **WHEN** user provides search keyword
-- **THEN** system returns conversations matching keyword in messages
+#### 场景：存储检索上下文
 
-### Requirement: View conversation details
-The system SHALL allow users to view conversation details.
+- **WHEN** Agent 为答案检索上下文
+- **THEN** 系统存储消息关联的检索片段 ID
 
-#### Scenario: View conversation messages
-- **WHEN** user selects conversation
-- **THEN** system displays all messages in chronological order
+### 需求：列出对话历史
 
-#### Scenario: View message citations
-- **WHEN** user views agent message with citations
-- **THEN** system displays citations with links to source chunks
+系统 SHALL 允许用户查看对话历史。
 
-### Requirement: Delete conversation history
-The system SHALL allow users to delete conversation history.
+#### 场景：列出对话
 
-#### Scenario: Delete single conversation
-- **WHEN** user deletes conversation
-- **THEN** system removes conversation and all associated messages
+- **WHEN** 用户请求对话列表
+- **THEN** 系统返回按最后活动时间排序的分页列表
 
-#### Scenario: Bulk delete conversations
-- **WHEN** user selects multiple conversations for deletion
-- **THEN** system removes all selected conversations
+#### 场景：搜索对话
 
-### Requirement: Support conversation context window
-The system SHALL manage conversation context for multi-turn dialogue.
+- **WHEN** 用户提供搜索关键词
+- **THEN** 系统返回消息中匹配关键词的对话
 
-#### Scenario: Maintain context in conversation
-- **WHEN** user asks follow-up question
-- **THEN** agent uses conversation history for context
+### 需求：查看对话详情
 
-#### Scenario: Context window limit
-- **WHEN** conversation exceeds context window limit
-- **THEN** system summarizes or truncates older messages
+系统 SHALL 允许用户查看对话详情。
+
+#### 场景：查看对话消息
+
+- **WHEN** 用户选择对话
+- **THEN** 系统按时间顺序显示所有消息
+
+#### 场景：查看消息引用
+
+- **WHEN** 用户查看带有引用的 Agent 消息
+- **THEN** 系统显示带有链接到源片段的引用
+
+### 需求：删除对话历史
+
+系统 SHALL 允许用户删除对话历史。
+
+#### 场景：删除单个对话
+
+- **WHEN** 用户删除对话
+- **THEN** 系统删除对话及所有关联消息
+
+#### 场景：批量删除对话
+
+- **WHEN** 用户选择多个对话进行删除
+- **THEN** 系统删除所有选中的对话
+
+### 需求：支持对话上下文窗口
+
+系统 SHALL 管理多轮对话的上下文。
+
+#### 场景：在对话中保持上下文
+
+- **WHEN** 用户提出后续问题
+- **THEN** Agent 使用对话历史作为上下文
+
+#### 场景：上下文窗口限制
+
+- **WHEN** 对话超过上下文窗口限制
+- **THEN** 系统总结或截断较旧的消息

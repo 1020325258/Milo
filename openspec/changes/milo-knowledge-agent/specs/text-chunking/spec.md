@@ -1,53 +1,67 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Chunk text by fixed token size
-The system SHALL split parsed text into chunks based on fixed token size.
+### 需求：按固定 Token 大小切片
 
-#### Scenario: Standard chunking
-- **WHEN** document text is processed with default settings (chunk_size=500, overlap=50)
-- **THEN** system splits text into chunks of approximately 500 tokens each
+系统 SHALL 基于固定 Token 大小将解析后的文本切分为片段。
 
-#### Scenario: Overlap between chunks
-- **WHEN** text is chunked
-- **THEN** each chunk shares approximately 50 tokens with adjacent chunks to maintain context continuity
+#### 场景：标准切片
 
-#### Scenario: Handle short documents
-- **WHEN** document contains fewer tokens than chunk_size
-- **THEN** system creates a single chunk containing all content
+- **WHEN** 文档文本以默认设置处理（chunk_size=500, overlap=50）
+- **THEN** 系统将文本切分为每段约 500 个 Token 的片段
 
-#### Scenario: Handle last chunk
-- **WHEN** remaining text is shorter than chunk_size
-- **THEN** system creates final chunk with remaining content without padding
+#### 场景：片段间重叠
 
-### Requirement: Preserve chunk source information
-The system SHALL maintain source information for each chunk.
+- **WHEN** 文本被切分
+- **THEN** 每个片段与相邻片段共享约 50 个 Token 以保持上下文连续性
 
-#### Scenario: Track chunk position
-- **WHEN** text is chunked
-- **THEN** each chunk records its start offset, end offset, and chunk index in the original document
+#### 场景：处理短文档
 
-#### Scenario: Track chunk source document
-- **WHEN** text is chunked
-- **THEN** each chunk references its source document ID
+- **WHEN** 文档包含的 Token 数少于 chunk_size
+- **THEN** 系统创建单个片段包含所有内容
 
-### Requirement: Support configurable chunking parameters
-The system SHALL allow configuration of chunking behavior.
+#### 场景：处理最后一个片段
 
-#### Scenario: Custom chunk size
-- **WHEN** user specifies custom chunk_size parameter
-- **THEN** system uses specified chunk size for chunking
+- **WHEN** 剩余文本短于 chunk_size
+- **THEN** 系统创建最终片段包含剩余内容，不进行填充
 
-#### Scenario: Custom overlap size
-- **WHEN** user specifies custom overlap parameter
-- **THEN** system uses specified overlap size for chunking
+### 需求：保留片段来源信息
 
-### Requirement: Generate unique chunk identifiers
-The system SHALL generate unique identifiers for each chunk.
+系统 SHALL 为每个片段维护来源信息。
 
-#### Scenario: Chunk ID generation
-- **WHEN** chunk is created
-- **THEN** system generates deterministic chunk ID based on document ID and chunk index
+#### 场景：追踪片段位置
 
-#### Scenario: Chunk ID uniqueness
-- **WHEN** multiple documents are processed
-- **THEN** all chunk IDs remain unique across the system
+- **WHEN** 文本被切分
+- **THEN** 每个片段记录其在原始文档中的起始偏移量、结束偏移量和片段索引
+
+#### 场景：追踪片段来源文档
+
+- **WHEN** 文本被切分
+- **THEN** 每个片段引用其来源文档 ID
+
+### 需求：支持可配置的切片参数
+
+系统 SHALL 允许配置切片行为。
+
+#### 场景：自定义片段大小
+
+- **WHEN** 用户指定自定义 chunk_size 参数
+- **THEN** 系统使用指定的片段大小进行切分
+
+#### 场景：自定义重叠大小
+
+- **WHEN** 用户指定自定义 overlap 参数
+- **THEN** 系统使用指定的重叠大小进行切分
+
+### 需求：生成唯一片段标识符
+
+系统 SHALL 为每个片段生成唯一标识符。
+
+#### 场景：片段 ID 生成
+
+- **WHEN** 片段被创建
+- **THEN** 系统基于文档 ID 和片段索引生成确定性的片段 ID
+
+#### 场景：片段 ID 唯一性
+
+- **WHEN** 多个文档被处理
+- **THEN** 所有片段 ID 在系统中保持唯一

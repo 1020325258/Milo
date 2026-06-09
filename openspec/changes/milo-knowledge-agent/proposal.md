@@ -1,8 +1,8 @@
-## Why
+## 为什么
 
 当前 SRE 团队在处理合同签约相关问题时，需要手动查阅大量的工单历史和业务规则文档，效率低下且知识传承困难。需要一个智能化的知识库助手，能够基于历史工单和业务规则快速提供准确的解决方案，提升问题处理效率和一致性。
 
-## What Changes
+## 变更内容
 
 - 新增完整的知识库管理系统，支持 MD 和 PDF 文档的上传、解析、切片和向量化
 - 实现基于 Elasticsearch 的混合检索能力（向量相似度 + BM25 全文检索）
@@ -11,9 +11,9 @@
 - 提供现代化的 Web 前端界面，支持知识库管理、文档管理和智能对话
 - 预留 Skill 系统和数据查询接口，支持后续功能扩展
 
-## Capabilities
+## 能力清单
 
-### New Capabilities
+### 新增能力
 
 - `document-parsing`: 文档解析能力，支持 MD 和 PDF 格式的文档解析为纯文本
 - `text-chunking`: 文本切片能力，基于固定 Token 策略进行智能切片，支持重叠窗口
@@ -24,11 +24,11 @@
 - `knowledge-management`: 知识库管理能力，支持多知识库的创建、编辑和删除
 - `conversation-history`: 对话历史能力，记录和管理用户的多轮对话
 
-### Modified Capabilities
+### 修改能力
 
 （无，这是全新项目）
 
-## Impact
+## 影响范围
 
 - **新增依赖**: agentscope, FastAPI, SQLAlchemy, PyMuPDF, markdown-it-py, elasticsearch-py, dashscope
 - **基础设施**: 需要 MySQL 8.x 和 Elasticsearch 8.x 服务

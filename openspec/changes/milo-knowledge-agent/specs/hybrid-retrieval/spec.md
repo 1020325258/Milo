@@ -1,49 +1,62 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Perform vector similarity search
-The system SHALL search for similar chunks using vector cosine similarity.
+### 需求：执行向量相似度搜索
 
-#### Scenario: Semantic search
-- **WHEN** user query is converted to embedding
-- **THEN** system searches ES with KNN query returning top-K most similar chunks
+系统 SHALL 使用向量余弦相似度搜索相似片段。
 
-#### Scenario: Filter by knowledge base
-- **WHEN** user specifies knowledge base
-- **THEN** system filters search results to specified knowledge base only
+#### 场景：语义搜索
 
-#### Scenario: Filter by document
-- **WHEN** user specifies document
-- **THEN** system filters search results to specified document only
+- **WHEN** 用户查询被转换为向量
+- **THEN** 系统使用 KNN 查询搜索 ES，返回最相似的 Top-K 个片段
 
-### Requirement: Perform BM25 full-text search
-The system SHALL search for chunks using BM25 text matching.
+#### 场景：按知识库过滤
 
-#### Scenario: Keyword search
-- **WHEN** user query is processed
-- **THEN** system searches ES with match query returning relevant chunks by text similarity
+- **WHEN** 用户指定知识库
+- **THEN** 系统将搜索结果过滤到指定的知识库
 
-#### Scenario: Handle Chinese text
-- **WHEN** query contains Chinese characters
-- **THEN** system uses appropriate Chinese analyzer for tokenization
+#### 场景：按文档过滤
 
-### Requirement: Fuse retrieval results with RRF
-The system SHALL combine vector and BM25 results using Reciprocal Rank Fusion.
+- **WHEN** 用户指定文档
+- **THEN** 系统将搜索结果过滤到指定的文档
 
-#### Scenario: RRF fusion
-- **WHEN** vector and BM25 results are retrieved
-- **THEN** system combines results using RRF algorithm with configurable k parameter (default=60)
+### 需求：执行 BM25 全文搜索
 
-#### Scenario: Weighted fusion
-- **WHEN** fusion is performed
-- **THEN** system applies configurable weights to vector and BM25 scores
+系统 SHALL 使用 BM25 文本匹配搜索片段。
 
-### Requirement: Support configurable retrieval parameters
-The system SHALL allow configuration of retrieval behavior.
+#### 场景：关键词搜索
 
-#### Scenario: Custom top-K
-- **WHEN** user specifies top_k parameter
-- **THEN** system returns specified number of results
+- **WHEN** 用户查询被处理
+- **THEN** 系统使用 match 查询搜索 ES，按文本相似度返回相关片段
 
-#### Scenario: Custom similarity threshold
-- **WHEN** user specifies similarity_threshold parameter
-- **THEN** system filters results below threshold
+#### 场景：处理中文文本
+
+- **WHEN** 查询包含中文字符
+- **THEN** 系统使用适当的中文分析器进行分词
+
+### 需求：使用 RRF 融合检索结果
+
+系统 SHALL 使用倒数排序融合（Reciprocal Rank Fusion）组合向量和 BM25 结果。
+
+#### 场景：RRF 融合
+
+- **WHEN** 向量和 BM25 结果被检索
+- **THEN** 系统使用 RRF 算法组合结果，k 参数可配置（默认=60）
+
+#### 场景：加权融合
+
+- **WHEN** 融合被执行
+- **THEN** 系统对向量和 BM25 分数应用可配置的权重
+
+### 需求：支持可配置的检索参数
+
+系统 SHALL 允许配置检索行为。
+
+#### 场景：自定义 Top-K
+
+- **WHEN** 用户指定 top_k 参数
+- **THEN** 系统返回指定数量的结果
+
+#### 场景：自定义相似度阈值
+
+- **WHEN** 用户指定 similarity_threshold 参数
+- **THEN** 系统过滤掉低于阈值的结果

@@ -1,57 +1,72 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Support Markdown document parsing
-The system SHALL support parsing Markdown (.md) documents into plain text while preserving structure information.
+### 需求：支持 Markdown 文档解析
 
-#### Scenario: Parse Markdown file with headers
-- **WHEN** user uploads a Markdown file containing headers (H1-H6)
-- **THEN** system extracts text content and preserves header hierarchy in metadata
+系统 SHALL 支持将 Markdown (.md) 文档解析为纯文本，同时保留结构信息。
 
-#### Scenario: Parse Markdown file with code blocks
-- **WHEN** user uploads a Markdown file containing code blocks
-- **THEN** system extracts code content and marks it as code in metadata
+#### 场景：解析包含标题的 Markdown 文件
 
-#### Scenario: Parse Markdown file with tables
-- **WHEN** user uploads a Markdown file containing tables
-- **THEN** system extracts table content and preserves table structure
+- **WHEN** 用户上传包含标题（H1-H6）的 Markdown 文件
+- **THEN** 系统提取文本内容并在元数据中保留标题层级结构
 
-#### Scenario: Parse Markdown file with links
-- **WHEN** user uploads a Markdown file containing links
-- **THEN** system extracts link text and URL information
+#### 场景：解析包含代码块的 Markdown 文件
 
-### Requirement: Support PDF document parsing
-The system SHALL support parsing PDF (.pdf) documents into plain text.
+- **WHEN** 用户上传包含代码块的 Markdown 文件
+- **THEN** 系统提取代码内容并在元数据中标记为代码
 
-#### Scenario: Parse text-based PDF file
-- **WHEN** user uploads a text-based PDF file
-- **THEN** system extracts all text content while preserving reading order
+#### 场景：解析包含表格的 Markdown 文件
 
-#### Scenario: Parse PDF with multiple pages
-- **WHEN** user uploads a PDF file with multiple pages
-- **THEN** system extracts text from all pages and maintains page boundaries in metadata
+- **WHEN** 用户上传包含表格的 Markdown 文件
+- **THEN** 系统提取表格内容并保留表格结构
 
-#### Scenario: Handle PDF parsing errors
-- **WHEN** user uploads a corrupted or password-protected PDF file
-- **THEN** system returns clear error message and logs the failure
+#### 场景：解析包含链接的 Markdown 文件
 
-### Requirement: Extract document metadata
-The system SHALL extract and store document metadata during parsing.
+- **WHEN** 用户上传包含链接的 Markdown 文件
+- **THEN** 系统提取链接文本和 URL 信息
 
-#### Scenario: Extract basic metadata
-- **WHEN** any document is uploaded
-- **THEN** system extracts file name, file size, file type, and creation timestamp
+### 需求：支持 PDF 文档解析
 
-#### Scenario: Extract content statistics
-- **WHEN** any document is parsed
-- **THEN** system calculates total character count, word count, and paragraph count
+系统 SHALL 支持将 PDF (.pdf) 文档解析为纯文本。
 
-### Requirement: Validate file format
-The system SHALL validate file format before processing.
+#### 场景：解析基于文本的 PDF 文件
 
-#### Scenario: Accept supported file formats
-- **WHEN** user uploads .md or .pdf file
-- **THEN** system accepts the file and proceeds with parsing
+- **WHEN** 用户上传基于文本的 PDF 文件
+- **THEN** 系统提取所有文本内容并保持阅读顺序
 
-#### Scenario: Reject unsupported file formats
-- **WHEN** user uploads file with unsupported extension (e.g., .docx, .txt)
-- **THEN** system rejects the file with clear error message listing supported formats
+#### 场景：解析多页 PDF 文件
+
+- **WHEN** 用户上传多页 PDF 文件
+- **THEN** 系统从所有页面提取文本并在元数据中保持页面边界
+
+#### 场景：处理 PDF 解析错误
+
+- **WHEN** 用户上传损坏或加密的 PDF 文件
+- **THEN** 系统返回清晰的错误信息并记录失败日志
+
+### 需求：提取文档元数据
+
+系统 SHALL 在解析过程中提取并存储文档元数据。
+
+#### 场景：提取基本元数据
+
+- **WHEN** 任何文档被上传
+- **THEN** 系统提取文件名、文件大小、文件类型和创建时间戳
+
+#### 场景：提取内容统计信息
+
+- **WHEN** 任何文档被解析
+- **THEN** 系统计算总字符数、单词数和段落数
+
+### 需求：验证文件格式
+
+系统 SHALL 在处理前验证文件格式。
+
+#### 场景：接受支持的文件格式
+
+- **WHEN** 用户上传 .md 或 .pdf 文件
+- **THEN** 系统接受文件并继续处理
+
+#### 场景：拒绝不支持的文件格式
+
+- **WHEN** 用户上传不支持的扩展名文件（如 .docx, .txt）
+- **THEN** 系统拒绝文件并返回清晰的错误信息，列出支持的格式

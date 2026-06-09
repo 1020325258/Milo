@@ -1,4 +1,4 @@
-## Context
+## 背景
 
 Milo 是一个基于 agentscope 框架的知识库 Agent 系统，旨在帮助 SRE 团队快速检索和利用历史工单和业务规则文档。当前系统需要依赖人工记忆和手动搜索来解决问题，效率低下且知识传承困难。
 
@@ -13,22 +13,22 @@ Milo 是一个基于 agentscope 框架的知识库 Agent 系统，旨在帮助 S
 - 仅支持 MD 和 PDF 文件格式
 - 不支持多模态能力
 
-## Goals / Non-Goals
+## 目标 / 非目标
 
-**Goals**:
+**目标**:
 - 实现完整的文档处理流水线：解析 → 切片 → 向量化 → 存储
 - 提供高质量的混合检索能力（向量 + 全文 + Rerank）
 - 构建基于 agentscope 的 RAG Agent，支持引用溯源
 - 提供用户友好的 Web 界面
 - 预留扩展接口（Skill、Data Query）
 
-**Non-Goals**:
+**非目标**:
 - 不实现知识图谱和实体关系提取
 - 不支持多模态文档（图片、音视频）
 - 不实现实时协作编辑
 - 不实现复杂的权限管理系统
 
-## Decisions
+## 技术决策
 
 ### 1. 文档解析方案
 
@@ -127,7 +127,7 @@ Milo 是一个基于 agentscope 框架的知识库 Agent 系统，旨在帮助 S
 - MySQL: knowledge_base, document, chunk, conversation, message
 - ES: chunks index (text + vector + metadata)
 
-## Risks / Trade-offs
+## 风险与权衡
 
 ### 风险 1: ES 向量检索性能
 
@@ -177,7 +177,7 @@ Milo 是一个基于 agentscope 框架的知识库 Agent 系统，旨在帮助 S
 
 **影响**: 有 API 调用成本，但无需维护本地模型，效果有保障
 
-## Migration Plan
+## 迁移计划
 
 这是全新项目，无迁移需求。
 
@@ -193,7 +193,7 @@ Milo 是一个基于 agentscope 框架的知识库 Agent 系统，旨在帮助 S
 - 数据库使用独立实例，可快速切换
 - 前端支持版本回退
 
-## Open Questions
+## 待解决问题
 
 1. **Rerank 模型选择**: 使用 DashScope Rerank API 还是本地模型？
 2. **对话历史保留策略**: 是否需要定期清理历史对话？

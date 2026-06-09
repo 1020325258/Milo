@@ -1,42 +1,53 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Rerank retrieval results
-The system SHALL rerank retrieval results to improve relevance.
+### 需求：重排检索结果
 
-#### Scenario: Apply reranking model
-- **WHEN** retrieval results are obtained
-- **THEN** system applies reranking model to re-score results based on query-document relevance
+系统 SHALL 重排检索结果以提升相关性。
 
-#### Scenario: Use DashScope Rerank API
-- **WHEN** reranking is configured to use DashScope
-- **THEN** system calls DashScope Rerank API to rerank results
+#### 场景：应用重排模型
 
-#### Scenario: Use local reranking model
-- **WHEN** reranking is configured to use local model
-- **THEN** system applies local reranking model to rerank results
+- **WHEN** 检索结果被获取
+- **THEN** 系统应用重排模型基于查询-文档相关性重新评分
 
-### Requirement: Support configurable reranking
-The system SHALL allow configuration of reranking behavior.
+#### 场景：使用 DashScope Rerank API
 
-#### Scenario: Enable/disable reranking
-- **WHEN** user configures reranking setting
-- **THEN** system enables or disables reranking accordingly
+- **WHEN** 重排配置为使用 DashScope
+- **THEN** 系统调用 DashScope Rerank API 进行重排
 
-#### Scenario: Custom rerank top-K
-- **WHEN** user specifies rerank_top_k parameter
-- **THEN** system returns specified number of reranked results
+#### 场景：使用本地重排模型
 
-#### Scenario: Custom minimum rerank score
-- **WHEN** user specifies min_rerank_score parameter
-- **THEN** system filters results below threshold
+- **WHEN** 重排配置为使用本地模型
+- **THEN** 系统应用本地重排模型进行重排
 
-### Requirement: Handle reranking errors
-The system SHALL handle reranking failures gracefully.
+### 需求：支持可配置的重排
 
-#### Scenario: Rerank API failure
-- **WHEN** reranking API returns error
-- **THEN** system falls back to original retrieval results without reranking
+系统 SHALL 允许配置重排行为。
 
-#### Scenario: Rerank timeout
-- **WHEN** reranking takes too long
-- **THEN** system falls back to original retrieval results after timeout
+#### 场景：启用/禁用重排
+
+- **WHEN** 用户配置重排设置
+- **THEN** 系统相应地启用或禁用重排
+
+#### 场景：自定义重排 Top-K
+
+- **WHEN** 用户指定 rerank_top_k 参数
+- **THEN** 系统返回指定数量的重排结果
+
+#### 场景：自定义最低重排分数
+
+- **WHEN** 用户指定 min_rerank_score 参数
+- **THEN** 系统过滤掉低于阈值的结果
+
+### 需求：处理重排错误
+
+系统 SHALL 优雅地处理重排失败。
+
+#### 场景：重排 API 失败
+
+- **WHEN** 重排 API 返回错误
+- **THEN** 系统回退到原始检索结果，不进行重排
+
+#### 场景：重排超时
+
+- **WHEN** 重排耗时过长
+- **THEN** 系统在超时后回退到原始检索结果
