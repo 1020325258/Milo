@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Database, Plus, Trash2, FileText, RefreshCw, Eye, ChevronDown, ChevronRight } from 'lucide-react';
+import { Database, Plus, Trash2, FileText, RefreshCw, Eye, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface KnowledgeBase {
 	id: number;
@@ -27,8 +28,6 @@ interface Document {
 	created_at: string;
 }
 
-const API_BASE = '/api';
-
 interface Chunk {
 	id: number;
 	chunk_id: string;
@@ -36,6 +35,8 @@ interface Chunk {
 	content: string;
 	section_title: string | null;
 }
+
+const API_BASE = '/api';
 
 export function KnowledgeBasePage() {
 	const [kbs, setKbs] = useState<KnowledgeBase[]>([]);
@@ -142,7 +143,6 @@ export function KnowledgeBasePage() {
 			if (res.ok) {
 				const doc = await res.json();
 				toast.success(`上传成功: ${doc.filename}`);
-				// 自动处理
 				await fetch(`${API_BASE}/document/${doc.id}/process`, { method: 'POST' });
 				toast.success('文档处理完成');
 				fetchDocs(selectedKb.id);
@@ -299,86 +299,50 @@ export function KnowledgeBasePage() {
 							) : (
 								<div className="divide-y">
 									{documents.map((doc) => (
-										<div key={doc.id}>
-											<div className="flex items-center justify-between p-3 hover:bg-accent/50">
-												<div className="flex items-center gap-3 min-w-0">
-													<FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-													<div className="min-w-0">
-														<div className="text-sm font-medium truncate">{doc.filename}</div>
-														<div className="text-xs text-muted-foreground">
-															{doc.file_type?.toUpperCase()} · {formatSize(doc.file_size)} · {doc.chunk_count} 片段
-															<span className={`ml-2 ${
-																doc.status === 'completed' ? 'text-green-600' :
-																doc.status === 'processing' ? 'text-yellow-600' :
-																doc.status === 'failed' ? 'text-red-600' : 'text-muted-foreground'
-															}`}>
-																{doc.status === 'completed' ? '已完成' :
-																 doc.status === 'processing' ? '处理中' :
-																 doc.status === 'failed' ? '失败' : doc.status}
-															</span>
-														</div>
+										<div key={doc.id} className="flex items-center justify-between p-3 hover:bg-accent/50">
+											<div className="flex items-center gap-3 min-w-0">
+												<FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+												<div className="min-w-0">
+													<div className="text-sm font-medium truncate">{doc.filename}</div>
+													<div className="text-xs text-muted-foreground">
+														{doc.file_type?.toUpperCase()} · {formatSize(doc.file_size)} · {doc.chunk_count} 片段
+														<span className={`ml-2 ${
+															doc.status === 'completed' ? 'text-green-600' :
+															doc.status === 'processing' ? 'text-yellow-600' :
+															doc.status === 'failed' ? 'text-red-600' : 'text-muted-foreground'
+														}`}>
+															{doc.status === 'completed' ? '已完成' :
+															 doc.status === 'processing' ? '处理中' :
+															 doc.status === 'failed' ? '失败' : doc.status}
+														</span>
 													</div>
 												</div>
-												<div className="flex items-center gap-1">
-													<Button
-														size="icon-xs"
-														variant="ghost"
-														onClick={() => window.open(`/view/${doc.id}`, '_blank')}
-														title="查看内容"
-													>
-														<Eye className="h-3 w-3" />
-													</Button>
-													<Button
-														size="icon-xs"
-														variant="ghost"
-														onClick={() => fetchChunks(doc)}
-														title="查看分片"
-													>
-														{viewingDoc?.id === doc.id ? (
-															<ChevronDown className="h-3 w-3" />
-														) : (
-															<ChevronRight className="h-3 w-3" />
-														)}
-													</Button>
-													<Button
-														size="icon-xs"
-														variant="ghost"
-														onClick={() => handleDeleteDoc(doc.id)}
-													>
-														<Trash2 className="h-3 w-3" />
-													</Button>
-												</div>
 											</div>
-											{/* 分片列表 */}
-											{viewingDoc?.id === doc.id && (
-												<div className="bg-muted/30 border-t">
-													{chunksLoading ? (
-														<div className="p-4 text-sm text-muted-foreground">加载分片中...</div>
-													) : chunks.length === 0 ? (
-														<div className="p-4 text-sm text-muted-foreground">暂无分片</div>
-													) : (
-														<div className="max-h-80 overflow-auto">
-															{chunks.map((chunk) => (
-																<div key={chunk.id} className="p-3 border-b last:border-b-0">
-																	<div className="flex items-center gap-2 mb-1">
-																		<span className="text-xs font-mono text-muted-foreground">
-																			#{chunk.chunk_index}
-																		</span>
-																		{chunk.section_title && (
-																			<span className="text-xs font-medium text-foreground">
-																				{chunk.section_title}
-																			</span>
-																		)}
-																	</div>
-																	<p className="text-xs text-muted-foreground whitespace-pre-wrap line-clamp-4">
-																		{chunk.content}
-																	</p>
-																</div>
-															))}
-														</div>
-													)}
-												</div>
-											)}
+											<div className="flex items-center gap-1">
+												<Button
+													size="icon-xs"
+													variant="ghost"
+													onClick={() => window.open(`/view/${doc.id}`, '_blank')}
+													title="查看内容"
+												>
+													<Eye className="h-3 w-3" />
+												</Button>
+												<Button
+													size="icon-xs"
+													variant="ghost"
+													onClick={() => fetchChunks(doc)}
+													title="查看分片"
+												>
+													<ChevronRight className="h-3 w-3" />
+												</Button>
+												<Button
+													size="icon-xs"
+													variant="ghost"
+													onClick={() => handleDeleteDoc(doc.id)}
+												>
+													<Trash2 className="h-3 w-3" />
+												</Button>
+											</div>
 										</div>
 									))}
 								</div>
@@ -387,6 +351,43 @@ export function KnowledgeBasePage() {
 					</>
 				)}
 			</div>
+
+			{/* 分片查看弹窗 */}
+			<Dialog open={!!viewingDoc} onOpenChange={(open) => { if (!open) { setViewingDoc(null); setChunks([]); } }}>
+				<DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+					<DialogHeader>
+						<DialogTitle className="text-sm">
+							{viewingDoc?.filename} — {chunks.length} 个分片
+						</DialogTitle>
+					</DialogHeader>
+					<div className="flex-1 overflow-auto space-y-4 pr-2">
+						{chunksLoading ? (
+							<div className="text-center py-8 text-muted-foreground">加载中...</div>
+						) : chunks.length === 0 ? (
+							<div className="text-center py-8 text-muted-foreground">暂无分片</div>
+						) : (
+							chunks.map((chunk) => (
+								<div key={chunk.id} className="border rounded-lg p-4">
+									<div className="flex items-center gap-2 mb-2">
+										<span className="text-xs font-mono bg-muted px-2 py-0.5 rounded">
+											#{chunk.chunk_index}
+										</span>
+										{chunk.section_title && (
+											<span className="text-xs font-medium">{chunk.section_title}</span>
+										)}
+										<span className="text-xs text-muted-foreground ml-auto">
+											{chunk.content.length} 字符
+										</span>
+									</div>
+									<p className="text-sm whitespace-pre-wrap text-foreground/80">
+										{chunk.content}
+									</p>
+								</div>
+							))
+						)}
+					</div>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }

@@ -4,16 +4,23 @@
 使用 pydantic-settings 管理应用配置，支持从环境变量和 .env 文件加载。
 """
 
+import os
+from pathlib import Path
 from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# 后端根目录（app/core/config.py -> app/core -> app -> backend）
+_BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
+_ENV_FILE = _BACKEND_DIR / ".env"
+_FALLBACK_ENV = _BACKEND_DIR.parent / ".env"
 
 
 class Settings(BaseSettings):
     """应用配置"""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(_ENV_FILE) if _ENV_FILE.exists() else str(_FALLBACK_ENV),
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore",
@@ -46,7 +53,7 @@ class Settings(BaseSettings):
     # Chunking
     CHUNK_SIZE: int = 1200
     CHUNK_OVERLAP: int = 100
-    MIN_CHUNK_SIZE: int = 100
+    MIN_CHUNK_SIZE: int = 0
 
     # Retrieval
     RETRIEVAL_TOP_K: int = 20

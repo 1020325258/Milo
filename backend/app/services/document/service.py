@@ -74,10 +74,10 @@ class DocumentService:
         if not kb:
             raise ValueError(f"知识库不存在: {knowledge_base_id}")
 
-        # 获取文件类型
-        ext = os.path.splitext(filename)[1].lower()
+        # 获取文件类型（去掉开头的点）
+        ext = os.path.splitext(filename)[1].lower().lstrip(".")
         if ext not in self.parsers:
-            raise ValueError(f"不支持的文件格式: {ext}")
+            raise ValueError(f"不支持的文件格式: .{ext}")
 
         # 保存文件
         upload_dir = os.path.join(self.UPLOAD_DIR, str(knowledge_base_id))

@@ -45,9 +45,9 @@ async def upload_document(
     if not file.filename:
         raise HTTPException(status_code=400, detail="文件名不能为空")
 
-    ext = os.path.splitext(file.filename)[1].lower()
+    ext = os.path.splitext(file.filename)[1].lower().lstrip(".")
     if ext not in service.parsers:
-        raise HTTPException(status_code=400, detail=f"不支持的文件格式: {ext}")
+        raise HTTPException(status_code=400, detail=f"不支持的文件格式: .{ext}")
 
     # 保存临时文件
     with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as temp:
