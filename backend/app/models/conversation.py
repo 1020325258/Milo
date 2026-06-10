@@ -18,6 +18,7 @@ class Conversation(Base, TimestampMixin):
     __tablename__ = "conversation"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(String(100), nullable=False, default="default", index=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False, default="新对话")
     knowledge_base_id: Mapped[Optional[int]] = mapped_column(nullable=True)
     summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

@@ -6,7 +6,7 @@
 
 from typing import Annotated, Generator
 
-from fastapi import Depends
+from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -16,6 +16,30 @@ from app.services.embedding.dashscope import DashScopeEmbeddingService
 from app.services.retrieval.es_client import ESClient
 from app.services.retrieval.reranker import BaseReranker, DashScopeReranker
 from app.services.retrieval.retriever import Retriever
+
+
+async def get_current_user_id(
+    x_user_id: str = Header(
+        description="调用者的用户 ID。临时基于 header 的身份标识，后续将替换为 JWT 认证。",
+    ),
+) -> str:
+    """从 X-User-ID 请求头获取当前用户 ID。
+
+    Args:
+        x_user_id: X-User-ID header 值
+
+    Returns:
+        用户 ID 字符串
+
+    Raises:
+        HTTPException: header 缺失或为空时返回 401
+    """
+    if not x_user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="X-User-ID header is required.",
+        )
+    return x_user_id
 
 
 def get_db_session() -> Generator[Session, None, None]:
@@ -49,6 +73,7 @@ def get_retriever(
 
 # 类型别名
 DBSession = Annotated[Session, Depends(get_db_session)]
+UserID = Annotated[str, Depends(get_current_user_id)]
 EmbeddingService = Annotated[BaseEmbeddingService, Depends(get_embedding_service)]
 RerankerService = Annotated[BaseReranker, Depends(get_reranker)]
 ESService = Annotated[ESClient, Depends(get_es_service)]

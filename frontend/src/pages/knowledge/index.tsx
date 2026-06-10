@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Database, Plus, Trash2, FileText, RefreshCw, Eye, ChevronRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { client } from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -37,7 +38,6 @@ interface Chunk {
 	section_title: string | null;
 }
 
-const API_BASE = '/api';
 
 // Pipeline 步骤定义
 const PIPELINE_STEPS = [
@@ -66,8 +66,7 @@ export function KnowledgeBasePage() {
 	const fetchKbs = async () => {
 		setLoading(true);
 		try {
-			const res = await fetch(`${API_BASE}/knowledge/?page=1&page_size=100`);
-			const data = await res.json();
+			const data = await client.get<{ items: KnowledgeBase[] }>('/api/knowledge/', { page: '1', page_size: '100' });
 			setKbs(data.items || []);
 		} catch {
 			toast.error('加载知识库失败');
@@ -78,8 +77,7 @@ export function KnowledgeBasePage() {
 
 	const fetchDocs = async (kbId: number) => {
 		try {
-			const res = await fetch(`${API_BASE}/document/?knowledge_base_id=${kbId}&page=1&page_size=100`);
-			const data = await res.json();
+			const data = await client.get<{ items: Document[] }>('/api/document/', { knowledge_base_id: String(kbId), page: '1', page_size: '100' });
 			setDocuments(data.items || []);
 		} catch {
 			toast.error('加载文档失败');
@@ -90,8 +88,7 @@ export function KnowledgeBasePage() {
 		setChunksLoading(true);
 		setViewingDoc(doc);
 		try {
-			const res = await fetch(`${API_BASE}/document/${doc.id}/chunks`);
-			const data = await res.json();
+			const data = await client.get<{ chunks: Chunk[] }>(`/api/document/${doc.id}/chunks`);
 			setChunks(data.chunks || []);
 		} catch {
 			toast.error('加载分片失败');
@@ -111,21 +108,12 @@ export function KnowledgeBasePage() {
 	const handleCreate = async () => {
 		if (!newName.trim()) return;
 		try {
-			const res = await fetch(`${API_BASE}/knowledge/`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ name: newName, description: newDesc }),
-			});
-			if (res.ok) {
-				toast.success('知识库创建成功');
-				setShowCreate(false);
-				setNewName('');
-				setNewDesc('');
-				fetchKbs();
-			} else {
-				const err = await res.json();
-				toast.error(err.detail || '创建失败');
-			}
+			await client.post('/api/knowledge/', { name: newName, description: newDesc });
+			toast.success('知识库创建成功');
+			setShowCreate(false);
+			setNewName('');
+			setNewDesc('');
+			fetchKbs();
 		} catch {
 			toast.error('创建失败');
 		}
@@ -134,12 +122,10 @@ export function KnowledgeBasePage() {
 	const handleDelete = async (id: number) => {
 		if (!confirm('确定删除此知识库？所有文档将被清除。')) return;
 		try {
-			const res = await fetch(`${API_BASE}/knowledge/${id}`, { method: 'DELETE' });
-			if (res.ok) {
-				toast.success('已删除');
-				if (selectedKb?.id === id) setSelectedKb(null);
-				fetchKbs();
-			}
+			await client.delete(`/api/knowledge/${id}`);
+			toast.success('已删除');
+			if (selectedKb?.id === id) setSelectedKb(null);
+			fetchKbs();
 		} catch {
 			toast.error('删除失败');
 		}
@@ -157,40 +143,35 @@ export function KnowledgeBasePage() {
 		setProcessingDocId(-1); // 临时 ID
 
 		try {
-			const res = await fetch(`${API_BASE}/document/upload`, { method: 'POST', body: form });
-			if (!res.ok) {
-				const err = await res.json();
+			const { getUserId } = await import('@/api/client');
+			const uploadRes = await fetch('/api/document/upload', {
+				method: 'POST',
+				headers: { 'X-User-ID': getUserId() },
+				body: form,
+			});
+			if (!uploadRes.ok) {
+				const err = await uploadRes.json();
 				toast.error(err.detail || '上传失败');
 				setPipelineStep(-1);
 				setProcessingDocId(null);
 				return;
 			}
-			const doc = await res.json();
+			const doc = await uploadRes.json();
 			setProcessingDocId(doc.id);
 
 			// Step 1-4: 处理（后端会依次完成解析、分片、向量化、索引）
 			setPipelineStep(1);
-			const processRes = await fetch(`${API_BASE}/document/${doc.id}/process`, { method: 'POST' });
+			const result = await client.post<{ filename: string; chunk_count: number }>(`/api/document/${doc.id}/process`);
+			setPipelineStep(4);
+			toast.success(`处理完成: ${result.filename} (${result.chunk_count} 个分片)`);
 
-			if (processRes.ok) {
-				const result = await processRes.json();
-				setPipelineStep(4);
-				toast.success(`处理完成: ${result.filename} (${result.chunk_count} 个分片)`);
-
-				// 刷新列表
-				setTimeout(() => {
-					fetchDocs(selectedKb.id);
-					fetchKbs();
-					setPipelineStep(-1);
-					setProcessingDocId(null);
-				}, 1000);
-			} else {
-				const err = await processRes.json();
-				toast.error(`处理失败: ${err.detail || '未知错误'}`);
+			// 刷新列表
+			setTimeout(() => {
+				fetchDocs(selectedKb.id);
+				fetchKbs();
 				setPipelineStep(-1);
 				setProcessingDocId(null);
-				fetchDocs(selectedKb.id);
-			}
+			}, 1000);
 		} catch {
 			toast.error('上传失败');
 			setPipelineStep(-1);
@@ -202,7 +183,7 @@ export function KnowledgeBasePage() {
 	const handleDeleteDoc = async (docId: number) => {
 		if (!confirm('确定删除此文档？')) return;
 		try {
-			await fetch(`${API_BASE}/document/${docId}`, { method: 'DELETE' });
+			await client.delete(`/api/document/${docId}`);
 			toast.success('已删除');
 			if (selectedKb) {
 				fetchDocs(selectedKb.id);

@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.core.deps import DBSession, ESService, EmbeddingService, RetrieverService
+from app.core.deps import DBSession, ESService, EmbeddingService, RetrieverService, UserID
 from app.schemas.chat import ChatRequest, ChatResponse, MessageResponse
 from app.services.agent.service import AgentService
 from app.services.conversation.service import ConversationService
@@ -23,6 +23,7 @@ router = APIRouter()
 async def chat(
     request: ChatRequest,
     db: DBSession,
+    user_id: UserID,
     retriever: RetrieverService,
     embedding: EmbeddingService,
 ) -> ChatResponse:
@@ -32,13 +33,14 @@ async def chat(
     Args:
         request: 对话请求
         db: 数据库会话
+        user_id: 当前用户 ID
         retriever: 检索服务
         embedding: Embedding 服务
 
     Returns:
         对话响应
     """
-    conversation_service = ConversationService(db)
+    conversation_service = ConversationService(db, user_id)
     agent_service = AgentService(retriever, embedding)
 
     # 获取或创建对话
@@ -108,6 +110,7 @@ async def chat(
 async def chat_stream(
     request: ChatRequest,
     db: DBSession,
+    user_id: UserID,
     retriever: RetrieverService,
     embedding: EmbeddingService,
 ) -> StreamingResponse:
@@ -117,13 +120,14 @@ async def chat_stream(
     Args:
         request: 对话请求
         db: 数据库会话
+        user_id: 当前用户 ID
         retriever: 检索服务
         embedding: Embedding 服务
 
     Returns:
         流式响应
     """
-    conversation_service = ConversationService(db)
+    conversation_service = ConversationService(db, user_id)
     agent_service = AgentService(retriever, embedding)
 
     # 获取或创建对话
@@ -195,6 +199,7 @@ async def chat_stream(
 @router.get("/conversations", response_model=List[dict])
 async def list_conversations(
     db: DBSession,
+    user_id: UserID,
     page: int = Query(1, ge=1, description="页码"),
     page_size: int = Query(20, ge=1, le=100, description="每页数量"),
     search: Optional[str] = Query(None, description="搜索关键词"),
@@ -204,6 +209,7 @@ async def list_conversations(
 
     Args:
         db: 数据库会话
+        user_id: 当前用户 ID
         page: 页码
         page_size: 每页数量
         search: 搜索关键词
@@ -211,7 +217,7 @@ async def list_conversations(
     Returns:
         对话列表
     """
-    service = ConversationService(db)
+    service = ConversationService(db, user_id)
     items, total = service.list(page=page, page_size=page_size, search=search)
 
     return [
@@ -230,6 +236,7 @@ async def list_conversations(
 async def get_messages(
     conversation_id: int,
     db: DBSession,
+    user_id: UserID,
     limit: int = Query(50, ge=1, le=200, description="消息数量"),
 ) -> List[MessageResponse]:
     """
@@ -238,12 +245,13 @@ async def get_messages(
     Args:
         conversation_id: 对话 ID
         db: 数据库会话
+        user_id: 当前用户 ID
         limit: 消息数量
 
     Returns:
         消息列表
     """
-    service = ConversationService(db)
+    service = ConversationService(db, user_id)
     messages = service.get_messages(conversation_id=conversation_id, limit=limit)
 
     return [MessageResponse.model_validate(msg) for msg in messages]
@@ -253,6 +261,7 @@ async def get_messages(
 async def delete_conversation(
     conversation_id: int,
     db: DBSession,
+    user_id: UserID,
 ) -> None:
     """
     删除对话
@@ -260,8 +269,9 @@ async def delete_conversation(
     Args:
         conversation_id: 对话 ID
         db: 数据库会话
+        user_id: 当前用户 ID
     """
-    service = ConversationService(db)
+    service = ConversationService(db, user_id)
     success = service.delete(conversation_id)
 
     if not success:

@@ -17,14 +17,16 @@ from app.models.message import Message
 class ConversationService:
     """对话服务"""
 
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: Session, user_id: str) -> None:
         """
         初始化服务
 
         Args:
             db: 数据库会话
+            user_id: 当前用户 ID
         """
         self.db = db
+        self.user_id = user_id
 
     def create(
         self,
@@ -42,6 +44,7 @@ class ConversationService:
             创建的对话
         """
         conversation = Conversation(
+            user_id=self.user_id,
             title=title,
             knowledge_base_id=knowledge_base_id,
         )
@@ -60,7 +63,11 @@ class ConversationService:
         Returns:
             对话或 None
         """
-        return self.db.query(Conversation).filter(Conversation.id == conversation_id).first()
+        return (
+            self.db.query(Conversation)
+            .filter(Conversation.id == conversation_id, Conversation.user_id == self.user_id)
+            .first()
+        )
 
     def list(
         self,
@@ -79,7 +86,11 @@ class ConversationService:
         Returns:
             对话列表和总数
         """
-        query = self.db.query(Conversation).order_by(desc(Conversation.updated_at))
+        query = (
+            self.db.query(Conversation)
+            .filter(Conversation.user_id == self.user_id)
+            .order_by(desc(Conversation.updated_at))
+        )
 
         if search:
             query = query.filter(Conversation.title.contains(search))

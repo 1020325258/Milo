@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+import { client } from '@/api/client';
+
 export function ViewerPage() {
 	const { docId } = useParams<{ docId: string }>();
 	const [content, setContent] = useState<string>('');
@@ -17,14 +19,18 @@ export function ViewerPage() {
 			setLoading(true);
 			try {
 				// 获取文档信息
-				const infoRes = await fetch(`/api/document/${docId}`);
-				if (infoRes.ok) {
-					const info = await infoRes.json();
+				try {
+					const info = await client.get<{ filename: string }>(`/api/document/${docId}`);
 					setFilename(info.filename);
+				} catch {
+					// ignore
 				}
 
-				// 获取文档内容
-				const res = await fetch(`/api/document/${docId}/content`);
+				// 获取文档内容（纯文本，需要直接 fetch）
+				const { getUserId } = await import('@/api/client');
+				const res = await fetch(`/api/document/${docId}/content`, {
+					headers: { 'X-User-ID': getUserId() },
+				});
 				if (!res.ok) {
 					setError('加载失败');
 					return;
