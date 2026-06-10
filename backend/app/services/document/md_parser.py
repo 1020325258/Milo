@@ -90,13 +90,13 @@ class MarkdownParser(BaseParser):
 
     def _convert_to_text(self, content: str) -> str:
         """
-        将 Markdown 转换为纯文本
+        将 Markdown 转换为纯文本，保留标题结构（用于分片器的 section 检测）
 
         Args:
             content: Markdown 内容
 
         Returns:
-            纯文本
+            纯文本（保留 # 标题）
         """
         # 移除 YAML front matter
         content = re.sub(r"^---\n.+?\n---\n", "", content, flags=re.DOTALL)
@@ -123,8 +123,7 @@ class MarkdownParser(BaseParser):
         # 移除删除线
         content = re.sub(r"~~(.*?)~~", r"\1", content)
 
-        # 移除标题标记
-        content = re.sub(r"^#{1,6}\s+", "", content, flags=re.MULTILINE)
+        # 保留标题标记（## 等），不移除
 
         # 移除水平线
         content = re.sub(r"^[-*_]{3,}\s*$", "", content, flags=re.MULTILINE)

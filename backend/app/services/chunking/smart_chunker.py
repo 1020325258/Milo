@@ -36,9 +36,9 @@ class SmartChunker(BaseChunker):
             overlap: 重叠大小（token）
             min_chunk_size: 最小片段大小（token）
         """
-        self.max_chunk_size = max_chunk_size or settings.CHUNK_SIZE
-        self.overlap = overlap or settings.CHUNK_OVERLAP
-        self.min_chunk_size = min_chunk_size or settings.MIN_CHUNK_SIZE
+        self.max_chunk_size = max_chunk_size if max_chunk_size is not None else settings.CHUNK_SIZE
+        self.overlap = overlap if overlap is not None else settings.CHUNK_OVERLAP
+        self.min_chunk_size = min_chunk_size if min_chunk_size is not None else settings.MIN_CHUNK_SIZE
 
     def chunk(self, text: str, document_id: str) -> List[Chunk]:
         """

@@ -197,7 +197,7 @@ export function ChatViewport({ agentId, sessionId, onTeamUpdated }: ChatViewport
 		if (!view) return;
 		const sessionModel = view.session.config.chat_model_config;
 
-		if (sessionModel) {
+		if (sessionModel?.model && sessionModel?.credential_id) {
 			setSelectedModel(sessionModel);
 		} else {
 			const firstModel = getFirstAvailableModel();

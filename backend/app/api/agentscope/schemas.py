@@ -24,7 +24,7 @@ class ChatModelConfig(BaseModel):
     """聊天模型配置"""
     type: str = "chat_model"
     credential_id: str = ""
-    model: str = "qwen-max"
+    model: str = ""
     parameters: Dict[str, Any] = Field(default_factory=dict)
 
 

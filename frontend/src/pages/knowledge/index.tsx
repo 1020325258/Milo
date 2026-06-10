@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Database, Plus, Trash2, FileText, RefreshCw, Eye, ChevronRight } from 'lucide-react';
+import { Database, Plus, Trash2, FileText, RefreshCw, Eye, ChevronRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ interface Document {
 	file_size: number;
 	status: string;
 	chunk_count: number;
+	error_message: string | null;
 	created_at: string;
 }
 
@@ -38,6 +39,15 @@ interface Chunk {
 
 const API_BASE = '/api';
 
+// Pipeline 步骤定义
+const PIPELINE_STEPS = [
+	{ key: 'uploading', label: '上传文件' },
+	{ key: 'parsing', label: '解析文档' },
+	{ key: 'chunking', label: '智能分片' },
+	{ key: 'embedding', label: '向量化' },
+	{ key: 'indexing', label: '索引入库' },
+];
+
 export function KnowledgeBasePage() {
 	const [kbs, setKbs] = useState<KnowledgeBase[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -49,6 +59,9 @@ export function KnowledgeBasePage() {
 	const [viewingDoc, setViewingDoc] = useState<Document | null>(null);
 	const [chunks, setChunks] = useState<Chunk[]>([]);
 	const [chunksLoading, setChunksLoading] = useState(false);
+	// Pipeline 进度状态
+	const [processingDocId, setProcessingDocId] = useState<number | null>(null);
+	const [pipelineStep, setPipelineStep] = useState<number>(-1);
 
 	const fetchKbs = async () => {
 		setLoading(true);
@@ -138,20 +151,50 @@ export function KnowledgeBasePage() {
 		const form = new FormData();
 		form.append('file', file);
 		form.append('knowledge_base_id', String(selectedKb.id));
+
+		// Step 0: 上传
+		setPipelineStep(0);
+		setProcessingDocId(-1); // 临时 ID
+
 		try {
 			const res = await fetch(`${API_BASE}/document/upload`, { method: 'POST', body: form });
-			if (res.ok) {
-				const doc = await res.json();
-				toast.success(`上传成功: ${doc.filename}`);
-				await fetch(`${API_BASE}/document/${doc.id}/process`, { method: 'POST' });
-				toast.success('文档处理完成');
-				fetchDocs(selectedKb.id);
-				fetchKbs();
+			if (!res.ok) {
+				const err = await res.json();
+				toast.error(err.detail || '上传失败');
+				setPipelineStep(-1);
+				setProcessingDocId(null);
+				return;
+			}
+			const doc = await res.json();
+			setProcessingDocId(doc.id);
+
+			// Step 1-4: 处理（后端会依次完成解析、分片、向量化、索引）
+			setPipelineStep(1);
+			const processRes = await fetch(`${API_BASE}/document/${doc.id}/process`, { method: 'POST' });
+
+			if (processRes.ok) {
+				const result = await processRes.json();
+				setPipelineStep(4);
+				toast.success(`处理完成: ${result.filename} (${result.chunk_count} 个分片)`);
+
+				// 刷新列表
+				setTimeout(() => {
+					fetchDocs(selectedKb.id);
+					fetchKbs();
+					setPipelineStep(-1);
+					setProcessingDocId(null);
+				}, 1000);
 			} else {
-				toast.error('上传失败');
+				const err = await processRes.json();
+				toast.error(`处理失败: ${err.detail || '未知错误'}`);
+				setPipelineStep(-1);
+				setProcessingDocId(null);
+				fetchDocs(selectedKb.id);
 			}
 		} catch {
 			toast.error('上传失败');
+			setPipelineStep(-1);
+			setProcessingDocId(null);
 		}
 		e.target.value = '';
 	};
@@ -174,6 +217,16 @@ export function KnowledgeBasePage() {
 		if (bytes < 1024) return `${bytes} B`;
 		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
 		return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+	};
+
+	const statusLabel = (doc: Document) => {
+		switch (doc.status) {
+			case 'completed': return { text: '已完成', cls: 'text-green-600' };
+			case 'processing': return { text: '处理中', cls: 'text-yellow-600' };
+			case 'failed': return { text: '失败', cls: 'text-red-600' };
+			case 'pending': return { text: '待处理', cls: 'text-muted-foreground' };
+			default: return { text: doc.status, cls: 'text-muted-foreground' };
+		}
 	};
 
 	return (
@@ -264,7 +317,7 @@ export function KnowledgeBasePage() {
 							</div>
 							<div className="flex gap-2">
 								<label>
-									<Button size="sm" asChild>
+									<Button size="sm" asChild disabled={processingDocId !== null}>
 										<span>
 											<Plus className="h-3.5 w-3.5 mr-1" />
 											上传文档
@@ -292,59 +345,88 @@ export function KnowledgeBasePage() {
 						</div>
 
 						<div className="flex-1 overflow-auto">
-							{documents.length === 0 ? (
+							{/* Pipeline 进度 */}
+							{pipelineStep >= 0 && (
+								<div className="m-4 p-4 border rounded-lg bg-muted/30">
+									<div className="flex items-center gap-2 mb-3">
+										<Loader2 className="h-4 w-4 animate-spin text-primary" />
+										<span className="text-sm font-medium">文档处理中...</span>
+									</div>
+									<div className="flex items-center gap-1">
+										{PIPELINE_STEPS.map((step, i) => (
+											<div key={step.key} className="flex items-center">
+												<div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs ${
+													i < pipelineStep ? 'bg-green-100 text-green-700' :
+													i === pipelineStep ? 'bg-primary/10 text-primary font-medium' :
+													'bg-muted text-muted-foreground'
+												}`}>
+													{i < pipelineStep ? '✓' : i === pipelineStep ? (
+														<Loader2 className="h-3 w-3 animate-spin" />
+													) : '○'}
+													{step.label}
+												</div>
+												{i < PIPELINE_STEPS.length - 1 && (
+													<div className={`w-6 h-px mx-0.5 ${i < pipelineStep ? 'bg-green-300' : 'bg-border'}`} />
+												)}
+											</div>
+										))}
+									</div>
+								</div>
+							)}
+
+							{documents.length === 0 && pipelineStep < 0 ? (
 								<div className="flex-1 flex items-center justify-center h-full text-muted-foreground text-sm py-20">
 									暂无文档，点击上方按钮上传
 								</div>
 							) : (
 								<div className="divide-y">
-									{documents.map((doc) => (
-										<div key={doc.id} className="flex items-center justify-between p-3 hover:bg-accent/50">
-											<div className="flex items-center gap-3 min-w-0">
-												<FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-												<div className="min-w-0">
-													<div className="text-sm font-medium truncate">{doc.filename}</div>
-													<div className="text-xs text-muted-foreground">
-														{doc.file_type?.toUpperCase()} · {formatSize(doc.file_size)} · {doc.chunk_count} 片段
-														<span className={`ml-2 ${
-															doc.status === 'completed' ? 'text-green-600' :
-															doc.status === 'processing' ? 'text-yellow-600' :
-															doc.status === 'failed' ? 'text-red-600' : 'text-muted-foreground'
-														}`}>
-															{doc.status === 'completed' ? '已完成' :
-															 doc.status === 'processing' ? '处理中' :
-															 doc.status === 'failed' ? '失败' : doc.status}
-														</span>
+									{documents.map((doc) => {
+										const st = statusLabel(doc);
+										return (
+											<div key={doc.id} className="flex items-center justify-between p-3 hover:bg-accent/50">
+												<div className="flex items-center gap-3 min-w-0">
+													<FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+													<div className="min-w-0">
+														<div className="text-sm font-medium truncate">{doc.filename}</div>
+														<div className="text-xs text-muted-foreground">
+															{doc.file_type?.toUpperCase()} · {formatSize(doc.file_size)} · {doc.chunk_count} 片段
+															<span className={`ml-2 ${st.cls}`}>{st.text}</span>
+															{doc.status === 'failed' && doc.error_message && (
+																<span className="ml-2 text-red-500 truncate max-w-[200px] inline-block align-bottom">
+																	({doc.error_message})
+																</span>
+															)}
+														</div>
 													</div>
 												</div>
+												<div className="flex items-center gap-1">
+													<Button
+														size="icon-xs"
+														variant="ghost"
+														onClick={() => window.open(`/view/${doc.id}`, '_blank')}
+														title="查看内容"
+													>
+														<Eye className="h-3 w-3" />
+													</Button>
+													<Button
+														size="icon-xs"
+														variant="ghost"
+														onClick={() => fetchChunks(doc)}
+														title="查看分片"
+													>
+														<ChevronRight className="h-3 w-3" />
+													</Button>
+													<Button
+														size="icon-xs"
+														variant="ghost"
+														onClick={() => handleDeleteDoc(doc.id)}
+													>
+														<Trash2 className="h-3 w-3" />
+													</Button>
+												</div>
 											</div>
-											<div className="flex items-center gap-1">
-												<Button
-													size="icon-xs"
-													variant="ghost"
-													onClick={() => window.open(`/view/${doc.id}`, '_blank')}
-													title="查看内容"
-												>
-													<Eye className="h-3 w-3" />
-												</Button>
-												<Button
-													size="icon-xs"
-													variant="ghost"
-													onClick={() => fetchChunks(doc)}
-													title="查看分片"
-												>
-													<ChevronRight className="h-3 w-3" />
-												</Button>
-												<Button
-													size="icon-xs"
-													variant="ghost"
-													onClick={() => handleDeleteDoc(doc.id)}
-												>
-													<Trash2 className="h-3 w-3" />
-												</Button>
-											</div>
-										</div>
-									))}
+										);
+									})}
 								</div>
 							)}
 						</div>
@@ -354,32 +436,32 @@ export function KnowledgeBasePage() {
 
 			{/* 分片查看弹窗 */}
 			<Dialog open={!!viewingDoc} onOpenChange={(open) => { if (!open) { setViewingDoc(null); setChunks([]); } }}>
-				<DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+				<DialogContent className="max-w-5xl w-[90vw] max-h-[85vh] flex flex-col overflow-hidden">
 					<DialogHeader>
 						<DialogTitle className="text-sm">
 							{viewingDoc?.filename} — {chunks.length} 个分片
 						</DialogTitle>
 					</DialogHeader>
-					<div className="flex-1 overflow-auto space-y-4 pr-2">
+					<div className="flex-1 overflow-auto space-y-4 pr-2 min-h-0">
 						{chunksLoading ? (
 							<div className="text-center py-8 text-muted-foreground">加载中...</div>
 						) : chunks.length === 0 ? (
 							<div className="text-center py-8 text-muted-foreground">暂无分片</div>
 						) : (
 							chunks.map((chunk) => (
-								<div key={chunk.id} className="border rounded-lg p-4">
+								<div key={chunk.id} className="border rounded-lg p-4 overflow-hidden">
 									<div className="flex items-center gap-2 mb-2">
-										<span className="text-xs font-mono bg-muted px-2 py-0.5 rounded">
+										<span className="text-xs font-mono bg-muted px-2 py-0.5 rounded shrink-0">
 											#{chunk.chunk_index}
 										</span>
 										{chunk.section_title && (
-											<span className="text-xs font-medium">{chunk.section_title}</span>
+											<span className="text-xs font-medium truncate">{chunk.section_title}</span>
 										)}
-										<span className="text-xs text-muted-foreground ml-auto">
+										<span className="text-xs text-muted-foreground ml-auto shrink-0">
 											{chunk.content.length} 字符
 										</span>
 									</div>
-									<p className="text-sm whitespace-pre-wrap text-foreground/80">
+									<p className="text-sm whitespace-pre-wrap break-words text-foreground/80 overflow-hidden">
 										{chunk.content}
 									</p>
 								</div>

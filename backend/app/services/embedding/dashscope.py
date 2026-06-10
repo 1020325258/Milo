@@ -31,8 +31,8 @@ class DashScopeEmbeddingService(BaseEmbeddingService):
         if not texts:
             return []
 
-        # DashScope API 限制每次最多 25 条
-        batch_size = 25
+        # DashScope API 限制每次最多 10 条
+        batch_size = 10
         all_embeddings = []
 
         for i in range(0, len(texts), batch_size):

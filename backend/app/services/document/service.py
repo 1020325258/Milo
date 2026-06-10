@@ -24,7 +24,11 @@ from app.services.retrieval.es_client import ESClient
 class DocumentService:
     """文档服务"""
 
-    UPLOAD_DIR = "uploads"
+    # 使用绝对路径，避免 CWD 影响
+    # __file__ = .../backend/app/services/document/service.py
+    # 需要回溯 4 层到 backend/
+    _BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    UPLOAD_DIR = os.path.join(_BACKEND_DIR, "uploads")
 
     def __init__(
         self,

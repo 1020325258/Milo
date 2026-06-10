@@ -205,12 +205,12 @@ const ChatPageInner = () => {
 							<span className="text-muted-foreground text-xs">
 								{localStorage.getItem('server_url')}
 							</span>
-							<div className="flex flex-row gap-x-2 items-center">
+							<div className="flex flex-row gap-x-1 items-center overflow-hidden">
 								<Select
 									value={urlAgentId ?? ''}
 									onValueChange={(id) => navigate(`/chat/${id}`)}
 								>
-									<SelectTrigger className="w-full" size="sm">
+									<SelectTrigger className="flex-1 min-w-0" size="sm">
 										<SelectValue
 											placeholder={t('chat.agent.selectPlaceholder')}
 										/>
@@ -239,6 +239,7 @@ const ChatPageInner = () => {
 								<Button
 									size="icon"
 									variant="ghost"
+									className="shrink-0"
 									disabled={!urlAgentId}
 									onClick={() => setEditOpen(true)}
 								>
@@ -247,6 +248,7 @@ const ChatPageInner = () => {
 								<Button
 									size="icon"
 									variant="ghost"
+									className="shrink-0"
 									disabled={!urlAgentId}
 									onClick={() => setDeleteOpen(true)}
 								>
